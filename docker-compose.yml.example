@@ -1,0 +1,19 @@
+virtuoso_data:
+    image: busybox
+    tty: true
+    volumes:
+        - /virtuoso_db:/virtuoso_db:z
+        - ./virtuoso.ini:/usr/local/virtuoso-opensource/var/lib/virtuoso/db/virtuoso.ini:z
+        - /shared_folder/local/cr3/files:z
+        - /shared_folder/backups/sql:z
+        - /shared_folder/tmp:z
+    command: ["chown", "-v", "-R", "500:500", "/virtuoso_db"]
+
+virtuoso:
+    restart: always
+    image: eeacms/virtuoso:7.2.1 
+    ports:
+        - 8890:8890
+        - 1111:1111
+    volumes_from:
+        - virtuoso_data
