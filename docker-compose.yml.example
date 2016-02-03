@@ -4,10 +4,9 @@ virtuoso_data:
     volumes:
         - /virtuoso_db:/virtuoso_db:z
         - ./virtuoso.ini:/usr/local/virtuoso-opensource/var/lib/virtuoso/db/virtuoso.ini:z
-        - /shared_folder/local/cr3/files:z
-        - /shared_folder/backups/sql:z
-        - /shared_folder/tmp:z
-    command: ["chown", "-v", "-R", "500:500", "/virtuoso_db"]
+        - /folder_host/local/cr3/files:/shared_folder/local/cr3/files:z
+        - /folder_host/backups/sql:/shared_folder/backups/sql:z
+        - /folder_host/tmp:/shared_folder/tmp:z
 
 virtuoso:
     restart: always
