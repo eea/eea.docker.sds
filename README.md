@@ -2,39 +2,43 @@
 
 ### 1. Deployment
 __1.1 Getting the latest release up__
+
 ```
-shell> git clone https://github.com/eea/eea.docker.sds.git 
-       git clone https://github.com/eea/eea.docker.virtuoso.git
+shell> git clone https://github.com/eea/eea.docker.sds.git
        cd eea.docker.virtuoso
 ```
-In order to configure the Virtuoso, one needs to rename the example file in __virtuoso.ini__ and set the parameters to needed settings.
-Also for using docker-compose you need to copy the file from eea.docker.sds in eea.docker.virtuoso, rename the example and set the path for shared folders
+The Virtuoso is already configured. In order to reconfigure the Virtuoso, one needs to use file  __virtuoso.ini__ and set the parameters to needed settings.
 
 __1.2 Setting up shared folders, required for uploading files and harvesting rdfs__
 
-To actually use a shared folder between Virtuoso and SDS / CR app, you have to set the folders from volumes zone in docker-compose file :
+The docker-compose file is configured to use established shared folders. To actually use a different shared folder between Virtuoso and SDS app, you have to set them from volumes zone:
 ```
-volumes:
-  - /folder_host/local/cr3/files:/shared_folder/local/cr3/files:z
-  - /folder_host/backups/sql:/shared_folder/backups/sql:z
-  - /folder_host/tmp:/shared_folder/tmp:z
+    - /var/local/cr3/files:/var/local/cr3/files:z
+    - /var/backups/sql:/var/backups/sql:z
+    - /var/tmp:/var/tmp:z
 ```
 After, if needed, specify updated path folders in __virtuoso.ini__ file on DirsAllowed parameters.
 
-If you need to modify the default path of temporary database, you can add a busybox data container with the needed path inside container and change the Databasefile parameter from Tempdatabase section from __virtuoso.ini__ file.
+If you need to modify the default path of temporary database, you can add a busybox data container with the needed path inside container and change the Databasefile parameter from Tempdatabase section in __virtuoso.ini__ file.
 Or, if you want only a folder on host, add a volume in virtuoso container, mapped to specified folder, inside the docker-compose file.
 
-__1.3 Starting Virtuoso container for the first time__
+__1.3 Development setup__
+
+For development purposes you need to expose port 1112, in order to run integration tests in Maven.
+
+__1.4 Starting Virtuoso container for the first time__
 ```
 shell> docker-compose up -d --no-recreate
 ```
 
 ### 2. Migrating existing data
-__2.1__ Remove the default data files
+__2.1 Remove the default data files__
+
+In other terminal, you have to delete all the files related to data:
 ```
 shell> docker exec eeadockervirtuoso_virtuoso_1 find /virtuoso_db/ -type f ! -name '*.ini' -delete
 ```
-__2.2__ Copy the existing virtuoso.db from the mounted volume with data
+__2.2 Copy the existing virtuoso.db from the mounted volume with data__
 ```
 docker run --rm \
   --volumes-from eeadockervirtuoso_datav_1 \
@@ -43,11 +47,12 @@ busybox \
   sh -c "cp -r /restore/virtuoso.db /virtuoso_db && \
   chown -R 500:500 /virtuoso_db"
 ```
-__2.3.__ Restart the container
+__2.3 Restart the container__
 ```
 shell> docker-compose stop
        docker-compose up -d --no-recreate
 ```
+Now you have docker container with Virtuoso, connected to datacontainer with latest database.
 Next, we need to build the SDS application.
 
 ### 3. Install Java, Apache Tomcat and Maven
@@ -60,20 +65,21 @@ The necessary versions are as follows:
 
 ### 4. Download, configure and install SDS
 
-Clone SDS source code into denoted directory SDS_SOURCE_HOME in the below instructions.
+Clone SDS source code into /var/local/deploy directory with next instruction.
 ```
 shell> git clone https://github.com/eea/eionet.contreg.git
+       cd eionet.contreg/
 ```
-Before you can build SDS source code, you need to set your environment specific properties. For that, make a copy of unittest.properties in SDS_SOURCE_HOME, and rename it to local.properties. Go through the resulting file and change properties that are specific to your environment or wishes. Each property's exact meaning and effect is commented in the file.
+Before you can build SDS source code, you need to set your environment specific properties. For that, make a copy of unittest.properties in ```eionet.contreg/```, and rename it to local.properties. Go through the resulting file and change properties that are specific to your environment or wishes. Each property's exact meaning and effect is commented in the file.
 
-Now you are ready to build your SDS code. It is built with Maven. The following command assumes that Maven's executable (mvn) is on the command path, and that it is run while being in SDS_SOURCE_HOME directory:
+Now you are ready to build your SDS code with Maven. The following command assumes that Maven's executable (mvn) is on the command path, and that it is run while being in ```eionet.contreg/``` directory:
 ```
 shell> mvn -Dmaven.test.skip=true  clean install
 ```
 
 ### 5. Deploy SDS web application and run Tomcat
 
-If the build went well, you shall have cr.war file in SDS_SOURCE_HOME/target directory. Now you have to do is to simply copy that file into Tomcat's webapps directory. Optionally, you can also deploy the WAR file via Tomcat's web console, but be sure to have made the following Tomcat configuration trick, before running Tomcat.
+If the build went well, you shall have cr.war file in ```eionet.contreg/target/``` directory. Now you have to do is to simply copy that file into Tomcat's webapps directory.
 
 Before you run Tomcat, you need to change the way Tomcat handles URI encoding. By default, it uses ISO-8859-1 for that. But SDS needs UTF-8. Therefore make sure that the tag in Tomcat's server.xml has the following attributes:
 
