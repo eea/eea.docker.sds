@@ -5,7 +5,7 @@ __1.1 Getting the latest release up__
 
 ```
 shell> git clone https://github.com/eea/eea.docker.sds.git
-       cd eea.docker.virtuoso
+       cd eea.docker.sds
 ```
 The Virtuoso is already configured. In order to reconfigure the Virtuoso, one needs to use file  __virtuoso.ini__ and set the parameters to needed settings.
 
@@ -28,7 +28,7 @@ For development purposes you need to expose port 1112, in order to run integrati
 
 __1.4 Starting Virtuoso container for the first time__
 ```
-shell> docker-compose up -d --no-recreate
+shell> docker-compose up
 ```
 
 ### 2. Migrating existing data
@@ -36,12 +36,12 @@ __2.1 Remove the default data files__
 
 In other terminal, you have to delete all the files related to data:
 ```
-shell> docker exec eeadockervirtuoso_virtuoso_1 find /virtuoso_db/ -type f ! -name '*.ini' -delete
+shell> docker exec eeadockersds_virtuoso_1 find /virtuoso_db/ -type f ! -name '*.ini' -delete
 ```
 __2.2 Copy the existing virtuoso.db from the mounted volume with data__
 ```
 docker run --rm \
-  --volumes-from eeadockervirtuoso_datav_1 \
+  --volumes-from eeadockersds_virtuoso_data_1 \
   --volume <mounted-data-folder>/virtuoso.db:/restore/virtuoso.db:ro \
 busybox \
   sh -c "cp -r /restore/virtuoso.db /virtuoso_db && \
