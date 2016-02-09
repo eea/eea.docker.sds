@@ -11,7 +11,7 @@ virtuoso_data:
 
 virtuoso:
     restart: always
-    image: eeacms/virtuoso:7.2.1 
+    image: eeacms/virtuoso:7.2.0.1 
     ports:
         - 8890:8890
         - 1111:1111
