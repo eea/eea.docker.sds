@@ -79,13 +79,13 @@ shell> mvn -Dmaven.test.skip=true  clean install
 
 ### 5. Deploy SDS web application and run Tomcat
 
-If the build went well, you shall have cr.war file in ```eionet.contreg/target/``` directory. Now you have to do is to simply copy that file into Tomcat's webapps directory.
+If the build went well, the cr.war file will be available in ```eionet.contreg/target/``` directory. You have to do is to simply copy that file into Tomcat's ```webapps/``` directory. Rename it with ROOT.war if there isn't any other application in ```webapps/``` folder.
 
-Before you run Tomcat, you need to change the way Tomcat handles URI encoding. By default, it uses ISO-8859-1 for that. But SDS needs UTF-8. Therefore make sure that the tag in Tomcat's server.xml has the following attributes:
+Before you run Tomcat, you need to change the way Tomcat handles URI encoding. By default, it uses ISO-8859-1, but SDS needs UTF-8. Therefore make sure that the tag ```<Connector/>``` from server.xml has the following attributes:
 
 ```
 URIEncoding="UTF-8"
 useBodyEncodingForURI="true"
 ```
 
-Once Tomcat is running, open SDS in the browser. It's application context path is cr/, unless you renamed cr.war to something else or you chose to deploy SDS into a virtual host.
+Once Tomcat is running, open SDS in the browser. It's application context path is cr/, or /, unless you renamed cr.war.
